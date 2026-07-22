@@ -1,7 +1,7 @@
 """
 recommender.py
 
-Version 1 Content-Based Recommendation Engine
+Content-Based Recommendation Engine
 
 Pipeline
 
@@ -14,10 +14,13 @@ Find Song
 Retrieve Feature Vector
      │
      ▼
-Cosine Similarity
+Cosine Similarity (top-100 candidates)
      │
      ▼
-Top-K Similar Songs
+Hybrid Score  (audio + genre + popularity + artist)
+     │
+     ▼
+Diversity Re-rank (dedupe by artist, trim to top_k)
      │
      ▼
 Display Recommendations
@@ -26,30 +29,39 @@ This version uses:
 - StandardScaler
 - L2 Normalization
 - Cosine Similarity
+- Hybrid scoring + diversity re-ranking
 """
 
 import pickle
 import numpy as np
 import pandas as pd
+from scipy.sparse import load_npz
 
 from src.similarity import brute_force_topk
-
-
-
+from src.hybrid import HybridScorer
+from src.explainability import RecommendationExplainer
+from src.diversity import DiversityFilter
+from src.search_engine import SongSearch
 
 
 class SpotifyRecommender:
 
     def __init__(self):
 
+        self.explainer = RecommendationExplainer()
         print("Loading artifacts...")
 
         self.catalog = pd.read_pickle("artifacts/catalog.pkl")
-
-        self.feature_matrix = np.load("artifacts/feature_matrix.npy")
+        self.feature_matrix = load_npz("artifacts/feature_matrix.npz")
 
         with open("artifacts/scaler.pkl", "rb") as f:
             self.scaler = pickle.load(f)
+
+        # Fuzzy song/artist suggestion engine (used by .suggest())
+        self.smart_search = SongSearch(self.catalog)
+
+        self.hybrid = HybridScorer()
+        self.diversity = DiversityFilter()
 
         print("Artifacts loaded successfully!")
 
@@ -58,16 +70,25 @@ class SpotifyRecommender:
     def search_song(self, track_name):
 
         matches = (
-    self.catalog[
-        self.catalog["track_name"]
-        .str.lower()
-        .str.strip()
-        == track_name.lower().strip()
-    ]
-    .sort_values("popularity", ascending=False)
-)
+            self.catalog[
+                self.catalog["track_name"]
+                .str.lower()
+                .str.strip()
+                == track_name.lower().strip()
+            ]
+            .sort_values("popularity", ascending=False)
+        )
 
         return matches
+
+    # -----------------------------------
+
+    def suggest(self, query):
+        """
+        Return fuzzy search suggestions (song titles and artist matches)
+        for an incomplete or misspelled query.
+        """
+        return self.smart_search.search(query)
 
     # -----------------------------------
 
@@ -82,10 +103,12 @@ class SpotifyRecommender:
 
         query = self.feature_matrix[idx]
 
+        # Pull a larger candidate pool (100) than top_k so the diversity
+        # re-ranker has enough different artists to choose from.
         indices, scores = brute_force_topk(
             query=query,
             matrix=self.feature_matrix,
-            k=top_k + 1,
+            k=100,
             exclude={idx},
         )
 
@@ -100,15 +123,61 @@ class SpotifyRecommender:
             ],
         ].copy()
 
-        result["Similarity"] = (scores * 100).round(2)
+        # Audio similarity
+        result["Similarity"] = scores
+
+        # Remove duplicate recommendations
         result = result.drop_duplicates(
-            subset=["track_name", "artists", "album_name", "track_genre", "popularity"]
+            subset=[
+                "track_name",
+                "artists",
+                "album_name",
+                "track_genre",
+                "popularity",
+            ]
         )
-        result = result.sort_values(by="Similarity", ascending=False)
+
+        # Get the original query song
+        query_song = self.catalog.loc[idx]
+
+        # Calculate hybrid score
+        result = self.hybrid.calculate_scores(
+            recommendations=result,
+            query_song=query_song,
+        )
+
+        # Diversity re-rank + trim to top_k
+        result = self.diversity.rerank(
+            result,
+            top_k=top_k,
+        )
+
+        # ----------------------------
+        # Debug Output
+        # ----------------------------
+        print("\n" + "=" * 60)
+        print("QUERY SONG")
+        print("=" * 60)
+
+        print(self.catalog.loc[idx][
+            ["track_name", "artists", "track_genre", "popularity"]
+        ])
+
+        print("\n" + "=" * 60)
+        print("RECOMMENDATIONS")
+        print("=" * 60)
+
+        print(result[
+            [
+                "track_name",
+                "artists",
+                "track_genre",
+                "Similarity",
+                "Hybrid Score",
+            ]
+        ])
 
         return result
-
-    
 
 
 if __name__ == "__main__":

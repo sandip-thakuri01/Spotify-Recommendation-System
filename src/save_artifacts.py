@@ -3,7 +3,7 @@ save_artifacts.py
 
 Builds and saves all reusable project artifacts.
 """
-
+from scipy.sparse import save_npz
 from pathlib import Path
 import pickle
 import numpy as np
@@ -38,14 +38,16 @@ def save_artifacts():
     features, scaler = scale_audio_features(features)
 
     print("Preparing feature matrix...")
-    feature_matrix = prepare_feature_matrix(features)
+    feature_matrix, vectorizer = prepare_feature_matrix(features)
 
     ARTIFACTS.mkdir(exist_ok=True)
 
-    np.save(ARTIFACTS / "feature_matrix.npy", feature_matrix)
-
-    with open(ARTIFACTS / "scaler.pkl", "wb") as f:
-        pickle.dump(scaler, f)
+    save_npz(
+    "artifacts/feature_matrix.npz",
+    feature_matrix,
+  )
+    with open(ARTIFACTS / "vectorizer.pkl", "wb") as f:
+        pickle.dump(vectorizer, f)
 
     df.to_pickle(ARTIFACTS / "catalog.pkl")
 

@@ -6,6 +6,10 @@ Responsible for:
 2. Scaling numerical audio features
 3. Preparing data for the recommendation engine
 """
+from scipy.sparse import hstack
+from sklearn.preprocessing import normalize
+
+from src.text_features import build_tfidf_features
 from numpy import float32
 from sklearn.preprocessing import normalize
 from sklearn.preprocessing import StandardScaler
@@ -61,14 +65,30 @@ def scale_audio_features(df):
 
 def prepare_feature_matrix(df):
     """
-    Prepare a normalized feature matrix for cosine similarity.
+    Build the final hybrid feature matrix.
+
+    Final Matrix =
+        Audio Features +
+        TF-IDF Text Features
     """
 
-    X = df[AUDIO_FEATURES].values
+   
+    # Audio Features
+  
+    X_audio = df[AUDIO_FEATURES].values
 
-    X = normalize(X, norm="l2", )
 
-    return X.astype("float32")
+    X_text, vectorizer = build_tfidf_features(df)
+
+  
+    X = hstack([X_audio, X_text])
+
+    # ------------------------
+    # Normalize
+    # ------------------------
+    X = normalize(X)
+
+    return X, vectorizer
 
 
 if __name__ == "__main__":
