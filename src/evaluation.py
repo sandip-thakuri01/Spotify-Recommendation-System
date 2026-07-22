@@ -1,8 +1,3 @@
-"""
-evaluation.py
-
-Simple evaluation for recommendation quality.
-"""
 
 from src.recommender import SpotifyRecommender
 

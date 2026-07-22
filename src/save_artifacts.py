@@ -1,8 +1,4 @@
-"""
-save_artifacts.py
 
-Builds and saves all reusable project artifacts.
-"""
 from scipy.sparse import save_npz
 from pathlib import Path
 import pickle

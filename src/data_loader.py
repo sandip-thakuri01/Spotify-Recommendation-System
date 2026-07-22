@@ -1,20 +1,15 @@
 import pandas as pd
 from pathlib import Path
 
-# Project root directory
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Path to the raw dataset
+
 DATA_PATH = BASE_DIR / "data" / "raw" / "dataset.csv"
 
 
 def load_data():
-    """
-    Load the Spotify dataset.
-
-    Returns:
-        pandas.DataFrame
-    """
+    
     df = pd.read_csv(DATA_PATH)
     return df
 

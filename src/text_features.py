@@ -1,8 +1,3 @@
-"""
-text_features.py
-
-Creates TF-IDF features from text metadata.
-"""
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -15,9 +10,7 @@ TEXT_COLUMNS = [
 
 
 def build_text_corpus(df):
-    """
-    Combine important text columns into one string.
-    """
+    
 
     corpus = (
         df["track_name"].fillna("")
@@ -33,10 +26,7 @@ def build_text_corpus(df):
 
 
 def build_tfidf_features(df, max_features=1000):
-    """
-    Build TF-IDF feature matrix.
-    """
-
+   
     corpus = build_text_corpus(df)
 
     vectorizer = TfidfVectorizer(

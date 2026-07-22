@@ -1,8 +1,4 @@
-"""
-diversity.py
 
-Simple diversity re-ranking.
-"""
 
 import pandas as pd
 

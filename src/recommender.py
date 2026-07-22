@@ -1,36 +1,3 @@
-"""
-recommender.py
-
-Content-Based Recommendation Engine
-
-Pipeline
-
-User Input
-     │
-     ▼
-Find Song
-     │
-     ▼
-Retrieve Feature Vector
-     │
-     ▼
-Cosine Similarity (top-100 candidates)
-     │
-     ▼
-Hybrid Score  (audio + genre + popularity + artist)
-     │
-     ▼
-Diversity Re-rank (dedupe by artist, trim to top_k)
-     │
-     ▼
-Display Recommendations
-
-This version uses:
-- StandardScaler
-- L2 Normalization
-- Cosine Similarity
-- Hybrid scoring + diversity re-ranking
-"""
 
 import pickle
 import numpy as np
@@ -57,7 +24,6 @@ class SpotifyRecommender:
         with open("artifacts/scaler.pkl", "rb") as f:
             self.scaler = pickle.load(f)
 
-        # Fuzzy song/artist suggestion engine (used by .suggest())
         self.smart_search = SongSearch(self.catalog)
 
         self.hybrid = HybridScorer()
@@ -65,7 +31,7 @@ class SpotifyRecommender:
 
         print("Artifacts loaded successfully!")
 
-    # -----------------------------------
+
 
     def search_song(self, track_name):
 
@@ -81,7 +47,7 @@ class SpotifyRecommender:
 
         return matches
 
-    # -----------------------------------
+    
 
     def suggest(self, query):
         """
@@ -90,7 +56,7 @@ class SpotifyRecommender:
         """
         return self.smart_search.search(query)
 
-    # -----------------------------------
+    
 
     def recommend(self, track_name, top_k=10):
 
@@ -103,8 +69,7 @@ class SpotifyRecommender:
 
         query = self.feature_matrix[idx]
 
-        # Pull a larger candidate pool (100) than top_k so the diversity
-        # re-ranker has enough different artists to choose from.
+        
         indices, scores = brute_force_topk(
             query=query,
             matrix=self.feature_matrix,
@@ -123,10 +88,10 @@ class SpotifyRecommender:
             ],
         ].copy()
 
-        # Audio similarity
+        #
         result["Similarity"] = scores
 
-        # Remove duplicate recommendations
+        
         result = result.drop_duplicates(
             subset=[
                 "track_name",
@@ -152,9 +117,7 @@ class SpotifyRecommender:
             top_k=top_k,
         )
 
-        # ----------------------------
-        # Debug Output
-        # ----------------------------
+        
         print("\n" + "=" * 60)
         print("QUERY SONG")
         print("=" * 60)

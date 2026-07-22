@@ -1,8 +1,4 @@
-"""
-cards.py
 
-Reusable UI cards.
-"""
 
 import streamlit as st
 
@@ -30,7 +26,7 @@ def selected_song_card(song):
 
 <br><br>
 
-⭐ Popularity : {song['popularity']}
+ Popularity : {song['popularity']}
 
 </div>
 """,

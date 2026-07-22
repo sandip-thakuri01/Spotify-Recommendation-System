@@ -1,9 +1,4 @@
-"""
-search_engine.py
 
-Spotify-style fuzzy search.
-Supports searching by song title and artist.
-"""
 
 from rapidfuzz import process, fuzz
 
@@ -72,5 +67,5 @@ class SongSearch:
 
                 results.extend(songs)
 
-        # Remove duplicates while preserving order
+        
         return list(dict.fromkeys(results))[:limit]

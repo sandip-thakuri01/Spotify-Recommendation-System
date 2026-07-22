@@ -1,50 +1,11 @@
-"""
-similarity.py
--------------
-The core math of content-based filtering.
 
-We use COSINE SIMILARITY as the primary metric:
-
-    sim(a, b) = (a . b) / (||a|| * ||b||)
-
-Why cosine and not Euclidean distance?
-  * Our vectors mix several weighted blocks (audio / genre / text /
-    popularity). Cosine cares about the *direction* (the "taste profile
-    shape") of a vector, not its magnitude, so tracks with generally louder
-    feature values aren't unfairly penalized against quieter ones.
-  * Because every vector coming out of `FeatureStore` is already
-    L2-normalized (see feature_engineering.py), cosine similarity reduces to
-    a plain dot product: sim(a, b) = a . b. This is exactly what lets us use
-    fast ANN libraries (HNSW) that are built around inner-product / L2
-    search -- no runtime normalization needed.
-
-`matrix` may be a dense numpy array OR a scipy.sparse matrix (e.g. if the
-feature store includes a sparse genre/text block). Both are supported here;
-the sparse-vs-dense handling is centralized in this file so callers never
-have to think about it.
-
-Two similarity functions are provided:
-  * `brute_force_topk`  - exact O(N*d) search. Fine for a few thousand items
-    or for validating the ANN index's recall. Vectorized with a single
-    matrix multiply.
-  * `cosine_matrix`     - full pairwise similarity, only ever used on small
-    slices (e.g. for offline evaluation / diversity metrics), never on the
-    whole catalog (that would be O(N^2) and does not scale).
-"""
 
 from __future__ import annotations
 import numpy as np
 
 
 def _to_dense_vector(x) -> np.ndarray:
-    """Coerce a single feature row (dense ndarray OR sparse matrix row)
-    into a flat, dense 1-D numpy array.
-
-    Sparse matrices keep row-slices 2-D (shape (1, d)) instead of
-    collapsing to 1-D the way numpy does, and some scipy ops return
-    np.matrix instead of ndarray -- both cases are normalized here so
-    downstream matmuls never silently produce the wrong shape.
-    """
+   
     if hasattr(x, "toarray"):
         x = x.toarray()
     x = np.asarray(x)

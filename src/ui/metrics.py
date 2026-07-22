@@ -1,8 +1,4 @@
-"""
-metrics.py
 
-Dashboard metrics.
-"""
 
 import streamlit as st
 
@@ -19,13 +15,13 @@ def dataset_metrics(recommender):
 
     with col2:
         st.metric(
-            "📊 Features",
+            "Features",
             recommender.feature_matrix.shape[1]
         )
 
     with col3:
         st.metric(
-            "🤖 Model",
+            "Model",
             "Hybrid Content-Based"
         )
 

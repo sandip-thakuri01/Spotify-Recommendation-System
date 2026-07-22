@@ -1,15 +1,11 @@
-"""
-charts.py
 
-Charts for recommendation analytics.
-"""
 
 import streamlit as st
 import matplotlib.pyplot as plt
 
 
 def genre_chart(recommendations):
-    """Display genre distribution."""
+    
 
     genre_counts = recommendations["track_genre"].value_counts()
 
@@ -26,7 +22,7 @@ def genre_chart(recommendations):
 
 
 def popularity_chart(recommendations):
-    """Display popularity distribution."""
+    
 
     fig, ax = plt.subplots(figsize=(6, 4))
 
@@ -43,7 +39,7 @@ def popularity_chart(recommendations):
 
 
 def similarity_chart(recommendations):
-    """Display similarity scores."""
+   
 
     fig, ax = plt.subplots(figsize=(6, 4))
 

@@ -1,10 +1,4 @@
-"""
-hybrid.py
 
-Hybrid scoring module.
-
-Combines multiple recommendation signals.
-"""
 
 import pandas as pd
 
@@ -32,32 +26,23 @@ class HybridScorer:
 
         recommendations = recommendations.copy()
 
-        # -----------------------
-        # Genre Match
-        # -----------------------
         recommendations["Genre Match"] = (
             recommendations["track_genre"]
             == query_song["track_genre"]
         ).astype(int)
 
-        # -----------------------
-        # Artist Match
-        # -----------------------
+       
         recommendations["Artist Match"] = (
             recommendations["artists"]
             == query_song["artists"]
         ).astype(int)
 
-        # -----------------------
-        # Popularity
-        # -----------------------
+    
         recommendations["Popularity Score"] = (
             recommendations["popularity"] / 100
         )
 
-        # -----------------------
-        # Hybrid Score
-        # -----------------------
+    
         recommendations["Hybrid Score"] = (
             recommendations["Similarity"] * self.audio_weight
             + recommendations["Genre Match"] * self.genre_weight

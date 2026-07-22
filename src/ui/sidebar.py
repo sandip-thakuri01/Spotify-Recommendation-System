@@ -1,6 +1,3 @@
-"""
-sidebar.py
-"""
 
 import streamlit as st
 
@@ -29,15 +26,15 @@ def load_sidebar(recommender):
 
     st.sidebar.subheader("Recommendation Engine")
 
-    st.sidebar.write("✅ Audio Features")
+    st.sidebar.write(" Audio Features")
 
-    st.sidebar.write("✅ TF-IDF")
+    st.sidebar.write(" TF-IDF")
 
-    st.sidebar.write("✅ Hybrid Ranking")
+    st.sidebar.write(" Hybrid Ranking")
 
-    st.sidebar.write("✅ Diversity Filter")
+    st.sidebar.write(" Diversity Filter")
 
-    st.sidebar.write("✅ Explainability")
+    st.sidebar.write(" Explainability")
 
     st.sidebar.markdown("---")
 

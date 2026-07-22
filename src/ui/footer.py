@@ -1,6 +1,3 @@
-"""
-footer.py
-"""
 
 import streamlit as st
 
